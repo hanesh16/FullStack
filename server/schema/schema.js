@@ -92,7 +92,33 @@ const mutation = new GraphQLObjectType({
                 });
                 return Client.findByIdAndRemove(args.id)
             }
-        }
+        },
+        addItem:{
+            type:ItemType,
+            args:{
+                name:{type:GraphQLNonNull(GraphQLString)},
+                description:{type:GraphQLNonNull(GraphQLString)},
+                clientId:{type:GraphQLNonNull(GraphQLID)},
+                status:{type:new GraphQLEnumType({
+                    name:'ItemStatus',
+                    values:{
+                        'na':{value:'Not Available'},
+                        'sold':{value:'Sold Out'},
+                        'available':{value:'Available'}
+                    }
+                }),
+                defaultValue:'Available'
+            }
+            },resolve(parent,args){
+                const item = new Item({
+                    name:args.name,
+                    description:args.description,
+                    status:args.status,
+                    clientId:args.clientId
+                });
+                return item.save()
+            },
+        } 
     }
 })
 module.exports = new GraphQLSchema({
