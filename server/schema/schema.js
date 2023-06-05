@@ -45,6 +45,39 @@ const ItemType = new GraphQLObjectType({
     })
 })
 
+const RootQuery = new GraphQLObjectType({
+    name:'RootQueryType',
+    fields:{
+        items:{
+            type: new GraphQLList(ItemType),
+            resolve(parent,args){
+                return Item.find();
+            }
+        },
+        item:{
+            type:ItemType,
+            args:{id:{type:GraphQLID}},
+            resolve(parent,args){
+                return Item.findById(args.id)
+            }
+        },
+        clients:{
+            type: new GraphQLList(ClientType),
+            resolve(parent,args){
+                return Client.find();
+            }
+        },
+        client:{
+            type:ClientType,
+            args:{id:{type:GraphQLID}},
+            resolve(parent,args){
+                return Client.findById(args.id)
+            }
+        }
+    }
+})
+
+
 // Mutations
 
 const mutation = new GraphQLObjectType({
