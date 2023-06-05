@@ -45,54 +45,57 @@ const ItemType = new GraphQLObjectType({
     })
 })
 
+// Mutations
+
 const mutation = new GraphQLObjectType({
-    name: 'Mutation',
-    fields: {
+    name:'Mutation',
+    fields:{
         //Add Client
-        addClient: {
-            type: ClientType,
-            args: {
-                name: {
-                    type: GraphQLNonNull(GraphQLString)
+        addClient:{
+            type:ClientType,
+            args:{
+                name:{
+                    type:GraphQLNonNull(GraphQLString)
                 },
-                uname: {
-                    type: GraphQLNonNull(GraphQLString)
+                uname:{
+                    type:GraphQLNonNull(GraphQLString)
                 },
-                email: {
-                    type: GraphQLNonNull(GraphQLString)
+                email:{
+                    type:GraphQLNonNull(GraphQLString)
                 },
-                phone: {
-                    type: GraphQLNonNull(GraphQLString)
+                phone:{
+                    type:GraphQLNonNull(GraphQLString)
                 }
             },
-            resolve(parent, args) {
-                const client = new Client({
-                    name: args.name,
-                    uname: args.uname,
-                    email: args.email,
-                    phone: args.phone
+            resolve(parent,args){
+                const client=new Client({
+                    name:args.name,
+                    uname:args.uname,
+                    email:args.email,
+                    phone:args.phone
                 });
                 return client.save();
             }
         },
         // Delete Client
-        deleteClient: {
-            type: ClientType,
-            args: {
-                id: {
-                    type: GraphQLNonNull(GraphQLID)
+        deleteClient:{
+            type:ClientType,
+            args:{
+                id:{
+                    type:GraphQLNonNull(GraphQLID)
                 }
             },
-            resolve(parent, args) {
+            resolve(parent,args){
 
-                Item.deleteMany({ clientId: args.id }).then(function () {
+                Item.deleteMany({ clientId: args.id }).then(function(){
                     console.log("Data deleted"); // Success
-                }).catch(function (error) {
+                }).catch(function(error){
                     console.log(error); // Failure
                 });
                 return Client.findByIdAndRemove(args.id)
             }
         },
+        // Add Item
         addItem:{
             type:ItemType,
             args:{
@@ -118,9 +121,49 @@ const mutation = new GraphQLObjectType({
                 });
                 return item.save()
             },
-        } 
+        },
+        // Delete a Item
+        deleteItem:{
+            type:ItemType,
+            args:{
+                id:{type:GraphQLNonNull(GraphQLID)}
+            },
+            resolve(parent,args){
+                return Item.findByIdAndRemove(args.id)
+            }
+        },
+        // Update a Item
+        updateItem:{
+            type:ItemType,
+            args:{
+                id:{type:GraphQLNonNull(GraphQLID)},
+                name:{type:GraphQLString},
+                description:{type:GraphQLString},
+                status:{type:new GraphQLEnumType({
+                    name:"ItemStatusUpdate",
+                    values:{
+                        'na':{value:'Not Available'},
+                        'sold':{value:'Sold Out'},
+                        'available':{value:'Available'}
+                    }
+                }),
+            }
+            },resolve(parent,args){
+              return Item.findByIdAndUpdate(
+                args.id,{
+                    $set:{
+                        name:args.name,
+                        description:args.description,
+                        status:args.status
+
+                    }
+                },{new:true}
+              )
+            },
+        }
     }
 })
+
 module.exports = new GraphQLSchema({
     query: RootQuery,
     mutation
